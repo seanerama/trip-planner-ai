@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Planner AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-height: 800px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            background: #f0f0f0;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.assistant a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .message.assistant a:hover {
+            text-decoration: underline;
+        }
+
+        .message.assistant strong {
+            color: #333;
+        }
+
+        .message.assistant h2 {
+            font-size: 1rem;
+            margin: 10px 0 5px 0;
+            color: #667eea;
+        }
+
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: #f0f0f0;
+            border-radius: 18px;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing span:nth-child(1) { animation-delay: -0.32s; }
+        .typing span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .input-container {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-container input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #eee;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-container input:focus {
+            border-color: #667eea;
+        }
+
+        .input-container button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .input-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-container button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .welcome {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+        }
+
+        .welcome h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .suggestion {
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .suggestion:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Trip Planner AI</h1>
+            <p>Find the perfect vacation rental with AI assistance</p>
+        </div>
+
+        <div class="chat-container" id="chat">
+            <div class="welcome">
+                <h2>Welcome!</h2>
+                <p>I can help you find vacation rentals on Booking.com and Airbnb.</p>
+                <p>Just tell me where you want to go and when!</p>
+                <div class="suggestions">
+                    <span class="suggestion" onclick="useSuggestion(this)">Find a beach house in Miami for next weekend</span>
+                    <span class="suggestion" onclick="useSuggestion(this)">Hotels in Paris for 2 guests in March</span>
+                    <span class="suggestion" onclick="useSuggestion(this)">Vacation rentals in Tokyo</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="input" placeholder="Ask me about vacation rentals..." onkeypress="handleKeyPress(event)">
+            <button id="send" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        let sessionId = null;
+
+        function useSuggestion(element) {
+            document.getElementById('input').value = element.textContent;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function addMessage(content, role) {
+            const chat = document.getElementById('chat');
+            const welcome = chat.querySelector('.welcome');
+            if (welcome) welcome.remove();
+
+            const message = document.createElement('div');
+            message.className = `message ${role}`;
+
+            if (role === 'assistant') {
+                message.innerHTML = marked.parse(content);
+            } else {
+                message.textContent = content;
+            }
+
+            chat.appendChild(message);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function showTyping() {
+            const chat = document.getElementById('chat');
+            const typing = document.createElement('div');
+            typing.className = 'typing';
+            typing.id = 'typing';
+            typing.innerHTML = '<span></span><span></span><span></span>';
+            chat.appendChild(typing);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('input');
+            const button = document.getElementById('send');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            input.value = '';
+            input.disabled = true;
+            button.disabled = true;
+
+            addMessage(message, 'user');
+            showTyping();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: sessionId
+                    })
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (response.ok) {
+                    sessionId = data.session_id;
+                    addMessage(data.response, 'assistant');
+                } else {
+                    addMessage('Sorry, something went wrong. Please try again.', 'assistant');
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage('Sorry, I could not connect to the server.', 'assistant');
+            }
+
+            input.disabled = false;
+            button.disabled = false;
+            input.focus();
+        }
+    </script>
+</body>
+</html>
